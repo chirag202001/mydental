@@ -6,6 +6,7 @@ import type { NextAuthConfig } from "next-auth";
  * lives in auth.ts (Node.js only).
  */
 export const authConfig = {
+  trustHost: true,
   session: { strategy: "jwt" as const },
   pages: {
     signIn: "/login",
