@@ -157,6 +157,7 @@ export default async function AdminClinicDetailPage({
       {/* Admin actions */}
       <AdminClinicActions
         clinicId={clinic.id}
+        clinicName={clinic.name}
         currentPlan={clinic.subscription?.plan ?? "TRIAL"}
         currentStatus={clinic.subscription?.status ?? "TRIALING"}
       />
