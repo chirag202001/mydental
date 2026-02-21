@@ -77,6 +77,16 @@ export async function loginUser(formData: FormData) {
     return { error: "Invalid email or password" };
   }
 
+  // Check if Super Admin → redirect to admin panel instead of clinic dashboard
+  const user = await db.user.findUnique({
+    where: { email: parsed.data.email },
+    select: { isSuperAdmin: true },
+  });
+
+  if (user?.isSuperAdmin) {
+    redirect("/admin");
+  }
+
   redirect("/dashboard");
 }
 

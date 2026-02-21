@@ -16,7 +16,15 @@ export default async function DashboardLayout({
   if (!session?.user) redirect("/login");
 
   const ctx = await getTenantContext();
-  if (!ctx) redirect("/onboarding");
+  if (!ctx) {
+    // Super Admins may not have a clinic — send them to admin panel
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { isSuperAdmin: true },
+    });
+    if (user?.isSuperAdmin) redirect("/admin");
+    redirect("/onboarding");
+  }
 
   const subActive = await checkSubscriptionActive(ctx.clinicId);
 
