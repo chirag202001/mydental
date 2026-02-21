@@ -15,9 +15,18 @@ import {
   PhoneCall,
   HandHelping,
   Calculator,
+  Shield,
 } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
+  {
+    role: "Super Admin",
+    email: "superadmin@dentos.app",
+    password: "SuperAdmin@123",
+    icon: Shield,
+    color: "text-red-600 bg-red-50 border-red-200",
+    desc: "Platform-wide system admin",
+  },
   {
     role: "Owner",
     email: "owner@dentos.app",

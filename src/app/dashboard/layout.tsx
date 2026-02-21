@@ -56,9 +56,15 @@ export default async function DashboardLayout({
     bannerType = "inactive";
   }
 
+  // Check if user is super admin
+  const currentUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { isSuperAdmin: true },
+  });
+
   return (
     <div className="min-h-screen flex">
-      <Sidebar activeMembership={ctx} />
+      <Sidebar activeMembership={ctx} isSuperAdmin={currentUser?.isSuperAdmin ?? false} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Topbar />
         <main className="flex-1 p-6 bg-muted/30">

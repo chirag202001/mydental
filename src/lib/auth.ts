@@ -31,7 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email, image: user.image };
+        return { id: user.id, name: user.name, email: user.email, image: user.image, isSuperAdmin: user.isSuperAdmin };
       },
     }),
     ...(process.env.GOOGLE_CLIENT_ID

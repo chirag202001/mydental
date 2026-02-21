@@ -12,6 +12,7 @@ import {
   BarChart3,
   Settings,
   Lock,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TenantContext } from "@/lib/tenant";
@@ -69,9 +70,10 @@ const navItems: NavItem[] = [
 
 interface SidebarProps {
   activeMembership: TenantContext;
+  isSuperAdmin?: boolean;
 }
 
-export function Sidebar({ activeMembership }: SidebarProps) {
+export function Sidebar({ activeMembership, isSuperAdmin }: SidebarProps) {
   const pathname = usePathname();
 
   // Filter nav items by permissions
@@ -124,8 +126,19 @@ export function Sidebar({ activeMembership }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t text-xs text-muted-foreground">
-        DentOS v1.0
+      <div className="px-3 py-4 border-t space-y-1">
+        {isSuperAdmin && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+          >
+            <Shield className="h-4 w-4" />
+            System Admin
+          </Link>
+        )}
+        <div className="px-3 py-1 text-xs text-muted-foreground">
+          DentOS v1.0
+        </div>
       </div>
     </aside>
   );

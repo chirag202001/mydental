@@ -46,6 +46,7 @@ model User {
   image         String?
   passwordHash  String?
   phone         String?
+  isSuperAdmin  Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

@@ -150,6 +150,7 @@ async function main() {
   const receptionHash = await hash("Reception@123", 12);
   const assistantHash = await hash("Assistant@123", 12);
   const accountantHash = await hash("Accountant@123", 12);
+  const superAdminHash = await hash("SuperAdmin@123", 12);
 
   const owner = await prisma.user.upsert({
     where: { email: "owner@dentos.app" },
@@ -214,6 +215,19 @@ async function main() {
       email: "accountant@dentos.app",
       passwordHash: accountantHash,
       phone: "+91 88776 65522",
+    },
+  });
+
+  // Super Admin (platform-level, not tied to any clinic)
+  await prisma.user.upsert({
+    where: { email: "superadmin@dentos.app" },
+    update: { isSuperAdmin: true },
+    create: {
+      name: "Chirag Sharma",
+      email: "superadmin@dentos.app",
+      passwordHash: superAdminHash,
+      phone: "+91 99999 00000",
+      isSuperAdmin: true,
     },
   });
 
@@ -509,6 +523,8 @@ async function main() {
   });
 
   console.log("\n✅ Seed complete!");
+  console.log("   ─────────────────────────────────────");
+  console.log("   🔑 Super Admin:   superadmin@dentos.app / SuperAdmin@123");
   console.log("   ─────────────────────────────────────");
   console.log("   Owner login:      owner@dentos.app / Owner@123");
   console.log("   Admin login:      admin@dentos.app / Admin@123");
