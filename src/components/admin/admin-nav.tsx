@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   ScrollText,
   Shield,
+  UserCog,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -18,14 +19,19 @@ const NAV_ITEMS = [
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
+  { href: "/admin/profile", label: "Profile", icon: UserCog },
 ];
 
 export function AdminNav({
   email,
+  userName,
   hasClinic,
+  logoutButton,
 }: {
   email: string;
+  userName: string;
   hasClinic: boolean;
+  logoutButton: React.ReactNode;
 }) {
   const pathname = usePathname();
 
@@ -76,7 +82,20 @@ export function AdminNav({
             Back to Clinic
           </Link>
         )}
-        <div className="px-3 py-2 text-xs text-gray-500">{email}</div>
+
+        {/* User info + Logout */}
+        <div className="flex items-center gap-2 px-3 py-2">
+          <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-medium shrink-0">
+            {(userName || email).charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-gray-300 truncate">
+              {userName || "Admin"}
+            </p>
+            <p className="text-xs text-gray-500 truncate">{email}</p>
+          </div>
+        </div>
+        {logoutButton}
       </div>
     </aside>
   );
