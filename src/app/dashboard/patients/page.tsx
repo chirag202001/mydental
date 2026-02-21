@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus } from "lucide-react";
+import { WhatsAppButton } from "@/components/dashboard/whatsapp-button";
 
 export default async function PatientsPage({
   searchParams,
@@ -72,7 +73,18 @@ export default async function PatientsPage({
                         {p.firstName} {p.lastName}
                       </Link>
                     </TableCell>
-                    <TableCell>{p.phone ?? "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {p.phone ?? "—"}
+                        <WhatsAppButton
+                          phone={p.phone}
+                          templateParams={{
+                            patientName: `${p.firstName} ${p.lastName}`,
+                          }}
+                          size="icon"
+                        />
+                      </div>
+                    </TableCell>
                     <TableCell>{p.email ?? "—"}</TableCell>
                     <TableCell className="capitalize">{p.gender ?? "—"}</TableCell>
                     <TableCell>{new Date(p.createdAt).toLocaleDateString()}</TableCell>

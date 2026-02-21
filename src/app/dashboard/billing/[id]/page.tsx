@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { RecordPaymentForm } from "@/components/dashboard/record-payment-form";
 import { InvoiceStatusActions } from "@/components/dashboard/invoice-status-actions";
+import { WhatsAppButton } from "@/components/dashboard/whatsapp-button";
 
 const statusColors: Record<
   string,
@@ -198,6 +199,18 @@ export default async function InvoiceDetailPage({
               {invoice.patient.email && (
                 <p className="text-muted-foreground">{invoice.patient.email}</p>
               )}
+              <div className="pt-2">
+                <WhatsAppButton
+                  phone={invoice.patient.phone}
+                  templateParams={{
+                    patientName: `${invoice.patient.firstName} ${invoice.patient.lastName}`,
+                    invoiceNumber: invoice.invoiceNumber,
+                    amount: formatCurrency(invoice.total),
+                    balanceDue: formatCurrency(balanceDue),
+                  }}
+                  templates={["payment_reminder", "payment_receipt", "greeting"]}
+                />
+              </div>
             </CardContent>
           </Card>
 

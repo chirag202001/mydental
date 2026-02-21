@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, Calendar, List } from "lucide-react";
 import { CalendarView } from "@/components/dashboard/calendar-view";
+import { WhatsAppButton } from "@/components/dashboard/whatsapp-button";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "success" | "warning"> = {
   SCHEDULED: "secondary",
@@ -153,9 +154,21 @@ export default async function AppointmentsPage({
                             </div>
                           </div>
                         </div>
-                        <Badge variant={statusColors[apt.status] ?? "secondary"}>
-                          {apt.status.replace("_", " ")}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={statusColors[apt.status] ?? "secondary"}>
+                            {apt.status.replace("_", " ")}
+                          </Badge>
+                          <WhatsAppButton
+                            phone={apt.patient.phone}
+                            templateParams={{
+                              patientName: `${apt.patient.firstName} ${apt.patient.lastName}`,
+                              date: new Date(apt.startTime).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }),
+                              time: new Date(apt.startTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+                              dentistName: apt.dentistProfile?.clinicMember?.user?.name ?? undefined,
+                            }}
+                            size="icon"
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

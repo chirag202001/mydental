@@ -7,7 +7,8 @@ import { notFound } from "next/navigation";
 import { AppointmentStatusActions } from "@/components/dashboard/appointment-status-actions";
 import { ReminderToggle } from "@/components/dashboard/reminder-toggle";
 import { AddNoteForm } from "@/components/dashboard/add-note-form";
-import { Clock, User, Stethoscope, FileText, Pencil } from "lucide-react";
+import { WhatsAppButton } from "@/components/dashboard/whatsapp-button";
+import { Clock, User, Stethoscope, FileText, Pencil, MessageCircle } from "lucide-react";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "success" | "warning"> = {
   SCHEDULED: "secondary",
@@ -152,6 +153,16 @@ export default async function AppointmentDetailPage({
           <Card>
             <CardHeader><CardTitle className="text-lg">Quick Actions</CardTitle></CardHeader>
             <CardContent className="space-y-2">
+              <WhatsAppButton
+                phone={appointment.patient.phone}
+                templateParams={{
+                  patientName: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+                  date: startDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }),
+                  time: startDate.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+                  dentistName: appointment.dentistProfile?.clinicMember?.user?.name ?? undefined,
+                }}
+                templates={["appointment_reminder", "appointment_confirmation", "greeting", "followup"]}
+              />
               <Link href={`/dashboard/patients/${appointment.patient.id}`} className="block">
                 <Button variant="outline" className="w-full justify-start">
                   <User className="h-4 w-4 mr-2" /> View Patient

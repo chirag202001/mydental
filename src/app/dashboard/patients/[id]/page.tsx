@@ -8,6 +8,7 @@ import { MedicalHistoryEditor } from "@/components/dashboard/medical-history-edi
 import { AllergyManager } from "@/components/dashboard/allergy-manager";
 import { DentalChartEditor } from "@/components/dashboard/dental-chart-editor";
 import { DocumentManager } from "@/components/dashboard/document-manager";
+import { WhatsAppButton } from "@/components/dashboard/whatsapp-button";
 
 export default async function PatientDetailPage({
   params,
@@ -35,6 +36,13 @@ export default async function PatientDetailPage({
           </p>
         </div>
         <div className="flex gap-2">
+          <WhatsAppButton
+            phone={patient.phone}
+            templateParams={{
+              patientName: `${patient.firstName} ${patient.lastName}`,
+            }}
+            templates={["greeting", "appointment_reminder", "followup"]}
+          />
           <Link href={`/dashboard/appointments?patientId=${patient.id}`}>
             <Button variant="outline">Appointments</Button>
           </Link>
