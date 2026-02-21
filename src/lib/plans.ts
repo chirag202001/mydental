@@ -6,6 +6,8 @@ import { PlanType } from "@prisma/client";
 
 export interface PlanConfig {
   name: string;
+  /** Price in INR paise (e.g. 99900 = ₹999) */
+  priceInPaise: number;
   maxUsers: number;
   maxDentists: number;
   maxAppointmentsPerMonth: number;
@@ -18,15 +20,16 @@ export interface PlanConfig {
     treatmentPlans: boolean;
     multiClinic: boolean;
   };
-  stripe: {
-    monthlyPriceId: string;
-    yearlyPriceId: string;
+  razorpay: {
+    /** Razorpay Plan ID – created via Razorpay Dashboard or API */
+    planId: string;
   };
 }
 
 export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
   TRIAL: {
     name: "Trial",
+    priceInPaise: 0,
     maxUsers: 5,
     maxDentists: 2,
     maxAppointmentsPerMonth: 50,
@@ -39,10 +42,11 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
       treatmentPlans: true,
       multiClinic: false,
     },
-    stripe: { monthlyPriceId: "", yearlyPriceId: "" },
+    razorpay: { planId: "" },
   },
   BASIC: {
     name: "Basic",
+    priceInPaise: 99900,
     maxUsers: 10,
     maxDentists: 3,
     maxAppointmentsPerMonth: 200,
@@ -55,13 +59,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
       treatmentPlans: true,
       multiClinic: false,
     },
-    stripe: {
-      monthlyPriceId: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID ?? "",
-      yearlyPriceId: process.env.STRIPE_BASIC_YEARLY_PRICE_ID ?? "",
+    razorpay: {
+      planId: process.env.RAZORPAY_BASIC_PLAN_ID ?? "",
     },
   },
   PRO: {
     name: "Pro",
+    priceInPaise: 249900,
     maxUsers: 25,
     maxDentists: 10,
     maxAppointmentsPerMonth: 1000,
@@ -74,13 +78,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
       treatmentPlans: true,
       multiClinic: false,
     },
-    stripe: {
-      monthlyPriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? "",
-      yearlyPriceId: process.env.STRIPE_PRO_YEARLY_PRICE_ID ?? "",
+    razorpay: {
+      planId: process.env.RAZORPAY_PRO_PLAN_ID ?? "",
     },
   },
   ENTERPRISE: {
     name: "Enterprise",
+    priceInPaise: 499900,
     maxUsers: 999,
     maxDentists: 999,
     maxAppointmentsPerMonth: 99999,
@@ -93,9 +97,8 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
       treatmentPlans: true,
       multiClinic: true,
     },
-    stripe: {
-      monthlyPriceId: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID ?? "",
-      yearlyPriceId: process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID ?? "",
+    razorpay: {
+      planId: process.env.RAZORPAY_ENTERPRISE_PLAN_ID ?? "",
     },
   },
 };

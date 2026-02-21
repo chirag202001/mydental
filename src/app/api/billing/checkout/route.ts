@@ -1,53 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { requireTenantContext } from "@/lib/tenant";
+import { getRazorpay } from "@/lib/razorpay";
+import { PLAN_CONFIGS } from "@/lib/plans";
+import { PlanType } from "@prisma/client";
 
-// POST /api/billing/checkout – create a Stripe Checkout session
+// POST /api/billing/checkout – create a Razorpay Subscription
 export async function POST(req: NextRequest) {
   try {
     const ctx = await requireTenantContext();
-    const { priceId, successUrl, cancelUrl } = await req.json();
+    const { plan } = await req.json();
 
-    if (!priceId) {
-      return NextResponse.json({ error: "priceId required" }, { status: 400 });
+    if (!plan || !PLAN_CONFIGS[plan as PlanType]) {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    // Get or create Stripe customer
-    const sub = await db.subscription.findUnique({ where: { clinicId: ctx.clinicId } });
-    let customerId = sub?.stripeCustomerId;
+    const planConfig = PLAN_CONFIGS[plan as PlanType];
+    const razorpayPlanId = planConfig.razorpay.planId;
 
-    if (!customerId) {
-      const clinic = await db.clinic.findUnique({ where: { id: ctx.clinicId } });
-      const session = await auth();
-
-      const customer = await stripe.customers.create({
-        email: session?.user?.email ?? undefined,
-        name: clinic?.name ?? undefined,
-        metadata: { clinicId: ctx.clinicId },
-      });
-
-      customerId = customer.id;
-
-      await db.subscription.update({
-        where: { clinicId: ctx.clinicId },
-        data: { stripeCustomerId: customerId },
-      });
+    if (!razorpayPlanId) {
+      return NextResponse.json(
+        { error: "Razorpay Plan ID not configured for this plan" },
+        { status: 400 }
+      );
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: "subscription",
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl ?? `${process.env.NEXTAUTH_URL}/dashboard/settings/billing?success=true`,
-      cancel_url: cancelUrl ?? `${process.env.NEXTAUTH_URL}/dashboard/settings/billing?cancelled=true`,
-      metadata: { clinicId: ctx.clinicId },
+    const razorpay = getRazorpay();
+
+    // Create a Razorpay subscription
+    const subscription = await razorpay.subscriptions.create({
+      plan_id: razorpayPlanId,
+      total_count: 12, // 12 billing cycles (1 year monthly)
+      quantity: 1,
+      notes: {
+        clinicId: ctx.clinicId,
+        plan: plan,
+      },
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
+    // Store the Razorpay subscription ID
+    await db.subscription.update({
+      where: { clinicId: ctx.clinicId },
+      data: {
+        razorpaySubId: subscription.id,
+        razorpayPlanId: razorpayPlanId,
+      },
+    });
+
+    return NextResponse.json({
+      subscriptionId: subscription.id,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      plan: plan,
+    });
   } catch (err) {
     console.error("Checkout error:", err);
-    return NextResponse.json({ error: "Failed to create checkout" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create subscription" },
+      { status: 500 }
+    );
   }
 }

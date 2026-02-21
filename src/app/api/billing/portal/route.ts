@@ -1,26 +1,40 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getRazorpay } from "@/lib/razorpay";
 import { db } from "@/lib/db";
 import { requireTenantContext } from "@/lib/tenant";
 
-// POST /api/billing/portal – create a Stripe Customer Portal session
+// POST /api/billing/portal – cancel Razorpay subscription
 export async function POST() {
   try {
     const ctx = await requireTenantContext();
 
-    const sub = await db.subscription.findUnique({ where: { clinicId: ctx.clinicId } });
-    if (!sub?.stripeCustomerId) {
-      return NextResponse.json({ error: "No billing account found" }, { status: 400 });
-    }
-
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: sub.stripeCustomerId,
-      return_url: `${process.env.NEXTAUTH_URL}/dashboard/settings/billing`,
+    const sub = await db.subscription.findUnique({
+      where: { clinicId: ctx.clinicId },
     });
 
-    return NextResponse.json({ url: portalSession.url });
+    if (!sub?.razorpaySubId) {
+      return NextResponse.json(
+        { error: "No active subscription found" },
+        { status: 400 }
+      );
+    }
+
+    const razorpay = getRazorpay();
+
+    // Cancel at end of current billing period
+    await razorpay.subscriptions.cancel(sub.razorpaySubId, false);
+
+    await db.subscription.update({
+      where: { clinicId: ctx.clinicId },
+      data: { cancelAtPeriodEnd: true },
+    });
+
+    return NextResponse.json({ success: true, message: "Subscription will cancel at period end" });
   } catch (err) {
-    console.error("Portal error:", err);
-    return NextResponse.json({ error: "Failed to create portal session" }, { status: 500 });
+    console.error("Cancel subscription error:", err);
+    return NextResponse.json(
+      { error: "Failed to cancel subscription" },
+      { status: 500 }
+    );
   }
 }

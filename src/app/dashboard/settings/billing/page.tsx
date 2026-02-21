@@ -103,7 +103,8 @@ export default async function BillingSettingsPage() {
       {/* Upgrade / Manage */}
       <SubscriptionActions
         currentPlan={plan}
-        hasStripeSubscription={!!subscription?.stripeSubId}
+        hasActiveSubscription={!!subscription?.razorpaySubId}
+        cancelAtPeriodEnd={subscription?.cancelAtPeriodEnd ?? false}
       />
     </div>
   );
