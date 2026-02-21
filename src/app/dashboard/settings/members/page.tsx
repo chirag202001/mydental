@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { Plus, ShieldAlert } from "lucide-react";
 import { InviteMemberForm } from "@/components/dashboard/invite-member-form";
+import { MemberActions } from "@/components/dashboard/member-actions";
 import { redirect } from "next/navigation";
 
 export default async function MembersPage() {
@@ -37,11 +38,15 @@ export default async function MembersPage() {
 
   const members = await getClinicMembers();
   const canWrite = hasPermissions(ctx, [PERMISSIONS.MEMBERS_WRITE]);
+  const canDelete = hasPermissions(ctx, [PERMISSIONS.MEMBERS_DELETE]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Team Members</h1>
+        <Badge variant="outline" className="text-xs">
+          {members.filter((m: any) => m.isActive).length} active members
+        </Badge>
       </div>
 
       {/* Only show invite form if user has members:write */}
@@ -57,11 +62,14 @@ export default async function MembersPage() {
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Joined</TableHead>
+                {(canWrite || canDelete) && (
+                  <TableHead className="text-right">Actions</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {members.map((m: any) => (
-                <TableRow key={m.id}>
+                <TableRow key={m.id} className={!m.isActive ? "opacity-60" : ""}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
@@ -82,6 +90,20 @@ export default async function MembersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{new Date(m.joinedAt).toLocaleDateString()}</TableCell>
+                  {(canWrite || canDelete) && (
+                    <TableCell className="text-right">
+                      <MemberActions
+                        memberId={m.id}
+                        memberName={m.user.name ?? m.user.email}
+                        currentRole={m.role.name}
+                        isActive={m.isActive}
+                        isOwner={m.role.name === "Owner"}
+                        isSelf={m.userId === ctx.userId}
+                        canWrite={canWrite}
+                        canDelete={canDelete}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
