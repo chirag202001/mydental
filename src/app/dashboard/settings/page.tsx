@@ -1,28 +1,52 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CreditCard, Building } from "lucide-react";
+import { requireTenantContext, hasPermissions } from "@/lib/tenant";
+import { PERMISSIONS } from "@/lib/permissions";
 
-export default function SettingsPage() {
-  const sections = [
+export default async function SettingsPage() {
+  const ctx = await requireTenantContext();
+
+  const allSections = [
     {
       title: "Clinic Profile",
       description: "Update your clinic information",
       href: "/dashboard/settings/clinic",
       icon: Building,
+      permissions: [PERMISSIONS.SETTINGS_READ],
     },
     {
       title: "Team Members",
       description: "Manage your team and roles",
       href: "/dashboard/settings/members",
       icon: Users,
+      permissions: [PERMISSIONS.MEMBERS_READ],
     },
     {
       title: "Billing & Subscription",
       description: "Manage your plan and payment method",
       href: "/dashboard/settings/billing",
       icon: CreditCard,
+      permissions: [PERMISSIONS.SETTINGS_READ],
     },
   ];
+
+  // Filter sections by user permissions
+  const sections = allSections.filter((s) =>
+    hasPermissions(ctx, s.permissions as any)
+  );
+
+  if (sections.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          You don&apos;t have permission to access any settings. Contact your
+          clinic admin for access.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

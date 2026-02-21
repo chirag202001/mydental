@@ -5,6 +5,8 @@ import {
   getDentistRevenueReport,
   getAppointmentUtilization,
 } from "@/server/actions/reports";
+import { requireTenantContext, hasPermissions } from "@/lib/tenant";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,7 @@ import {
   AlertTriangle,
   UserCheck,
   Activity,
+  ShieldAlert,
 } from "lucide-react";
 
 const TABS = [
@@ -41,6 +44,29 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ tab?: string; from?: string; to?: string }>;
 }) {
+  const ctx = await requireTenantContext();
+
+  // Require reports:read permission
+  if (!hasPermissions(ctx, [PERMISSIONS.REPORTS_READ])) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Reports</h1>
+        <Card className="border-amber-200 bg-amber-50/50">
+          <CardContent className="p-6 flex items-center gap-4">
+            <ShieldAlert className="h-8 w-8 text-amber-600 shrink-0" />
+            <div>
+              <p className="font-medium text-amber-800">Access Denied</p>
+              <p className="text-sm text-amber-700 mt-1">
+                You don&apos;t have permission to view reports. Contact your
+                clinic owner or admin for access.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const sp = await searchParams;
   const activeTab = (sp.tab as Tab) || "revenue";
   const from = sp.from;

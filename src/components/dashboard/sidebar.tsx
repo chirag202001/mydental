@@ -65,7 +65,7 @@ const navItems: NavItem[] = [
     icon: BarChart3,
     permission: "reports:read",
   },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, permission: "settings:read" },
 ];
 
 interface SidebarProps {
